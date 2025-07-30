@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Match Bar with Logo Upload & Batsman Runs</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #101820;
+      color: #fff;
+    }
+    .live-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #1f2a38;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      font-size: 14px;
+      z-index: 999;
+    }
+    .team-info, .match-info, .bowler-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .team-logo, .bowler-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #eee;
+    }
+    .team-logo img, .bowler-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .details {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.3;
+    }
+    .status-text {
+      color: #00e676;
+      font-weight: bold;
+    }
+    .balls {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .ball {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 18px;
+      font-size: 12px;
+      color: black;
+      background: #ccc;
+    }
+    .ball.w { background: red; color: #fff; }
+    .ball.4 { background: orange; }
+    .ball.6 { background: gold; }
+    .ball.wd { background: #4fc3f7; }
+    .ball.dot { background: #999; }
+
+    .input-panel {
+      position: fixed;
+      bottom: 70px;
+      width: 100%;
+      background: #202a36;
+      padding: 10px;
+      text-align: center;
+    }
+    .input-panel input[type="text"] {
+      margin: 3px;
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      background: #2e3c4f;
+      color: white;
+      width: 120px;
+    }
+    .input-panel input[type="file"] {
+      margin: 3px;
+      color: white;
+    }
+    .input-panel button {
+      padding: 6px 12px;
+      background: #00e676;
+      border: none;
+      color: black;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="input-panel">
+  <input id="bat1" placeholder="Batsman 1 Name" />
+  <input id="run1" placeholder="Runs 1 (e.g. 42(42))" />
+  <input id="bat2" placeholder="Batsman 2 Name" />
+  <input id="run2" placeholder="Runs 2 (e.g. 36(15))" />
+  <input id="score" placeholder="Score / Overs" />
+  <input id="status" placeholder="Match Status" />
+  <input id="bowler" placeholder="Bowler (figures)" />
+  <input id="balls" placeholder="Balls (e.g. 0 4 6 wd w)" />
+  <br />
+  Bat Logo: <input type="file" id="batLogoInput" accept="image/*" />
+  Bowl Logo: <input type="file" id="bowlLogoInput" accept="image/*" />
+  <br />
+  <button onclick="updateLiveBar()">Update</button>
+</div>
+
+<div class="live-bar">
+  <div class="team-info">
+    <div class="team-logo"><img id="batLogo" src="lion.png" /></div>
+    <div class="details">
+      <div id="displayBat1">Batsman 1 0(0)</div>
+      <div id="displayBat2">Batsman 2 0(0)</div>
+    </div>
+  </div>
+
+  <div class="match-info">
+    <div class="details">
+      <div id="displayScore" class="status-text">Score</div>
+      <div id="displayStatus">Status</div>
+    </div>
+  </div>
+
+  <div class="bowler-info">
+    <div class="details">
+      <div id="displayBowler">Bowler</div>
+      <div class="balls" id="displayBalls"></div>
+    </div>
+    <div class="bowler-logo"><img id="bowlLogo" src="lion.png" /></div>
+  </div>
+</div>
+
+<script>
+function updateLiveBar() {
+  const bat1 = document.getElementById('bat1').value;
+  const bat2 = document.getElementById('bat2').value;
+  const run1 = document.getElementById('run1').value;
+  const run2 = document.getElementById('run2').value;
+
+  document.getElementById('displayBat1').textContent = `${bat1} ${run1}`;
+  document.getElementById('displayBat2').textContent = `${bat2} ${run2}`;
+  document.getElementById('displayScore').textContent = document.getElementById('score').value;
+  document.getElementById('displayStatus').textContent = document.getElementById('status').value;
+  document.getElementById('displayBowler').textContent = document.getElementById('bowler').value;
+
+  const ballsInput = document.getElementById('balls').value.trim().split(" ");
+  const ballContainer = document.getElementById('displayBalls');
+  ballContainer.innerHTML = '';
+
+  ballsInput.forEach(val => {
+    const ball = document.createElement('div');
+    ball.classList.add('ball');
+    if (val === 'w') ball.classList.add('w');
+    else if (val === '4') ball.classList.add('4');
+    else if (val === '6') ball.classList.add('6');
+    else if (val === 'wd') ball.classList.add('wd');
+    else if (val === '0') ball.classList.add('dot');
+    ball.textContent = val;
+    ballContainer.appendChild(ball);
+  });
+
+  const batLogoInput = document.getElementById('batLogoInput');
+  if (batLogoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('batLogo').src = e.target.result;
+    }
+    reader.readAsDataURL(batLogoInput.files[0]);
+  }
+
+  const bowlLogoInput = document.getElementById('bowlLogoInput');
+  if (bowlLogoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('bowlLogo').src = e.target.result;
+    }
+    reader.readAsDataURL(bowlLogoInput.files[0]);
+  }
+}
+</script>
+
+</body>
+</html>
